@@ -10,52 +10,54 @@ namespace Task_1
     {
         static void Main(string[] args)
         {
-            /*
-             * Что еще реализовать ?
-             * Разговор с поьзователем
-             * Класс Вывод
-             * Остальное по заданию
-             */
-
             Console.ForegroundColor = ConsoleColor.White;
 
             FileData Files = new FileData(@".\input.txt", @".\output.txt");
             DataParser Task = new DataParser(Files.GetFileData());
 
             Files.WriteToFile(Task.GetResult());
+            if (Task.CheckErr()) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error has occured");
+                Console.ForegroundColor = ConsoleColor.White;
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Input :");
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(Files.GetFileData());
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Result :");
-            Console.ForegroundColor = ConsoleColor.White;
-            string res = Task.GetResult();
-            for (int i = 0; i < res.Length; i++)
+            }
+            else
             {
-                if (i % 2 != 0)
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Input :");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine(Files.GetFileData());
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Result :");
+                Console.ForegroundColor = ConsoleColor.White;
+                string res = Task.GetResult();
+
+
+                for (int i = 0; i < res.Length; i++)
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                }
-                else
-                {
-                    if (Char.IsUpper(res[i]))
+                    if (i % 2 != 0)
                     {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                     }
                     else
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        if (Char.IsUpper(res[i]))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkCyan;
+                        }
                     }
+                    Console.Write(res[i]);
                 }
-                Console.Write(res[i]);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine();
+                Console.WriteLine();
             }
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine();
-            Console.WriteLine();
-
             Console.WriteLine("Press any key to exit.");
             Console.ReadKey();
         }
@@ -65,7 +67,7 @@ namespace Task_1
     /// </summary>
     class FileData
     {
-        
+
         private string fileData;
         private string filePathInput;
         private string filePathOutput;
@@ -86,7 +88,18 @@ namespace Task_1
 
         public string ReadFileData()
         {
-            fileData = System.IO.File.ReadAllText(filePathInput);
+            if (System.IO.File.Exists(filePathInput))
+            {
+                fileData = System.IO.File.ReadAllText(filePathInput);
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("File :" + filePathInput + "is missing.");
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("Creating empty input file in path");
+                System.IO.File.WriteAllText(filePathInput, "");
+            }
             return fileData;
         }
         public void WriteToFile(string data)
@@ -105,6 +118,12 @@ namespace Task_1
     {
         private string originData;
         private string parseResult;
+        private bool Error;
+
+        public bool CheckErr()
+        {
+            return Error;
+        }
 
         public DataParser(string Data)
         {
@@ -125,8 +144,10 @@ namespace Task_1
         {
             if (String.IsNullOrEmpty(newData))
             {
+                Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("String is empty or Null");
-                return "Error";
+                Error = true;
+                return null;
             }
             originData = newData;
             parseResult = Parse(originData);
@@ -136,7 +157,7 @@ namespace Task_1
         private string Parse(string Data)
         {
             string parseRes = "";
-            
+
             int cnt = 1;
             for (int i = 0; i < Data.Length; i++)
             {
